@@ -327,7 +327,8 @@
                 // Skip zero amplitude values (they would result in -Infinity)
                 if (amplitude === 0) continue;
 
-                let db = 20 * Math.log10(amplitude / 255); // Convert amplitude to decibels
+                // Convert amplitude to decibel scale
+                let db = 20 * Math.log10(amplitude / 255); // 255 is the max amplitude
 
                 // Update min and max decibel values
                 if (db < minDb) minDb = db;
