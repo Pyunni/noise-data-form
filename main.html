@@ -226,8 +226,8 @@
             
             <!-- Hidden until Stop Recording -->
             <div id="averageDecibels">
-                <label for="averageDb">Average Decibels:</label>
-                <input type="text" id="averageDb" name="averageDb" disabled>
+                <label for="averageDb"></label>
+                <input type="text" id="averageDb" name="averageDb" required>
             </div>
         </div>
 
@@ -243,17 +243,16 @@
         const stopBtn = document.getElementById('stopRecordingBtn');
         const minInput = document.getElementById('min');
         const maxInput = document.getElementById('max');
-        const avgInput = document.getElementById('avg');
         const avgDbInput = document.getElementById('averageDb');
         const averageDecibelsSection = document.getElementById('averageDecibels');
         
         startBtn.addEventListener('click', startRecording);
         stopBtn.addEventListener('click', stopRecording);
-
+        
         async function startRecording() {
             startBtn.disabled = true;
             stopBtn.disabled = false;
-            audioChunks = [];
+
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaRecorder = new MediaRecorder(stream);
             mediaRecorder.ondataavailable = event => {
@@ -286,7 +285,11 @@
             startBtn.disabled = false;
             stopBtn.disabled = true;
             averageDecibelsSection.style.display = 'block'; // Show average decibels after stopping
+
+            // Copy the average value to the hidden field for submission
+            avgDbInput.value = avgDbInput.value || 'N/A'; // Default to N/A if no value
         }
     </script>
+
 </body>
 </html>
