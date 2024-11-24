@@ -267,7 +267,7 @@
         <button type="submit">Submit</button>
     </div>
     </form>
-    <script>
+<script>
     let audioContext;
     let analyser;
     let dataArray;
@@ -288,7 +288,7 @@
                     dataArray = new Uint8Array(analyser.frequencyBinCount);
                     const source = audioContext.createMediaStreamSource(stream);
                     source.connect(analyser);
-                    
+
                     // Enable stop button and disable start button
                     document.getElementById("startRecordingBtn").disabled = true;
                     document.getElementById("stopRecordingBtn").disabled = false;
@@ -323,6 +323,10 @@
             // Calculate min, max, and average decibel values
             for (let i = 0; i < dataArray.length; i++) {
                 let amplitude = dataArray[i];
+
+                // Skip zero amplitude values (they would result in -Infinity)
+                if (amplitude === 0) continue;
+
                 let db = 20 * Math.log10(amplitude / 255); // Convert amplitude to decibels
 
                 // Update min and max decibel values
@@ -333,12 +337,13 @@
                 count++;
             }
 
-            const avgDb = sum / count;
+            // If we have valid data points, calculate the average
+            const avgDb = count > 0 ? sum / count : 0;
 
             // Display the live db results
-            document.getElementById("min").value = minDb.toFixed(2);
+            document.getElementById("min").value = minDb === Infinity ? 0 : minDb.toFixed(2);
             document.getElementById("avg").value = avgDb.toFixed(2);
-            document.getElementById("max").value = maxDb.toFixed(2);
+            document.getElementById("max").value = maxDb === -Infinity ? 0 : maxDb.toFixed(2);
 
             // Continue capturing decibels
             requestAnimationFrame(captureDecibels);
