@@ -13,40 +13,40 @@
             margin: 0;
             padding: 0;
             text-align: left;
-            padding-left: 20px;
-            padding-right: 20px;
+            padding-left: 5vw;
+            padding-right: 5vw;
         }
 
         header {
             background-color: #9575CD; /* Slightly darker purple */
-            padding: 20px;
+            padding: 10vw 5vw;
             text-align: left;
         }
 
         header h1 {
-            font-size: 2em;
+            font-size: 3vw;
             margin: 0;
-            padding: 10px 0;
+            padding: 1vw 0;
         }
 
         header p {
-            font-size: 1.2em;
+            font-size: 2vw;
         }
 
         /* Form container styling */
         form {
             background-color: #D1C4E9; /* Lighter purple */
             border-radius: 10px;
-            padding: 30px;
-            margin: 20px auto;
-            width: 100%;
-            max-width: 600px;
+            padding: 5vw;
+            margin: 2vw auto;
+            width: 90%;
+            max-width: 800px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
         label {
-            font-size: 1.1em;
-            margin-bottom: 10px;
+            font-size: 1.5vw;
+            margin-bottom: 1.5vw;
             display: inline-block;
             font-weight: bold; /* Bold questions */
             color: #7E57C2; /* Purple text */
@@ -54,33 +54,46 @@
 
         input[type="range"] {
             width: 100%;
-            margin: 10px 0;
+            margin: 1.5vw 0;
             background-color: #7E57C2; /* Match slider color to button */
         }
 
         input[type="text"], input[type="date"], input[type="time"], select {
-            padding: 10px;
-            margin: 10px 0;
+            padding: 2vw;
+            margin: 1.5vw 0;
             border-radius: 5px;
             width: 100%;
             border: 1px solid #ccc;
-            font-size: 1em;
+            font-size: 1.2vw;
             background-color: white; /* White input boxes */
             color: #7E57C2; /* Purple text */
         }
 
-        /* Button styles */
+        /* Centering button container */
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 2vw; /* Space between the buttons */
+            margin-top: 3vw;
+        }
+
+        /* Centering the start/stop recording buttons */
+        .recording-container {
+            display: flex;
+            justify-content: center;
+            gap: 2vw;
+            margin-top: 2vw;
+        }
+
         button {
             background-color: #7E57C2; /* Soft purple */
             color: white;
-            font-size: 1.1em;
-            padding: 10px 20px;
+            font-size: 1.5vw;
+            padding: 2vw 4vw;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            display: block;
-            margin: 30px auto 0 auto; /* Center the button */
         }
 
         button:hover {
@@ -92,7 +105,7 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            margin-bottom: 20px;
+            margin-bottom: 3vw;
         }
 
         .slider-container input[type="range"] {
@@ -108,31 +121,18 @@
         }
 
         .slider-labels span {
-            font-size: 0.9em;
+            font-size: 1vw;
         }
 
         .section {
-            margin-bottom: 20px;
+            margin-bottom: 3vw;
         }
 
-        /* Adjust for the min/max db section to match date/time format */
-        .section input[type="text"], .section select {
-            width: 100%;
-        }
-
-        /* Make dB input boxes white */
-        input[type="text"] {
-            background-color: white; /* Set the background of the dB input boxes to white */
-            color: black; /* Set text color to black for contrast */
-            border: 1px solid #ccc; /* Light gray border for the input boxes */
-        }
-
-        /* Align Date and Time inputs side by side */
         .date-time-container {
             display: flex;
             justify-content: space-between;
-            gap: 10px; /* Reduced gap for closer spacing */
-            margin-bottom: 20px;
+            gap: 2vw; /* Space between date and time inputs */
+            margin-bottom: 3vw;
             width: 100%;
         }
 
@@ -140,12 +140,51 @@
             width: 48%; /* Make each input take up about half the space */
         }
 
-        /* Center text for specific lines */
-        .center-text {
+        /* Centering the "Hit record and record" text */
+        #recordMessage {
             text-align: center;
-            font-size: 1.1em;
-            margin-top: 10px;
         }
+
+        /* Responsiveness for small screens */
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 5vw; /* Smaller header font size */
+            }
+
+            header p {
+                font-size: 4vw;
+            }
+
+            label {
+                font-size: 4vw;
+            }
+
+            input[type="range"] {
+                width: 100%;
+            }
+
+            input[type="text"], input[type="date"], input[type="time"], select {
+                font-size: 4vw;
+            }
+
+            button {
+                font-size: 4vw;
+                padding: 4vw 8vw;
+            }
+
+            .slider-container input[type="range"] {
+                width: 100%;
+            }
+
+            .slider-labels span {
+                font-size: 3vw;
+            }
+
+            .date-time-container input {
+                width: 48%;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -208,7 +247,10 @@
 
     <!-- Decibel checker section -->
     <div class="section">
-        <button type="button" id="startRecordingBtn">Start Recording</button>
+        <div class="recording-container">
+            <button type="button" id="startRecordingBtn">Start Recording</button>
+            <button type="button" id="stopRecordingBtn" disabled>Stop Recording</button>
+        </div>
         <div id="dbResults" style="display: none;">
             <label for="min">Min:</label>
             <input type="text" id="min" name="min" disabled>
@@ -217,11 +259,14 @@
             <label for="max">Max:</label>
             <input type="text" id="max" name="max" disabled>
         </div>
-        <p class="center-text"><i>Hit record and record for 2-5mins. It will automatically fill in the information.</i></p>
+        <p id="recordMessage"><i>Hit record and record for 2-5mins. It will automatically fill in the information.</i></p>
     </div>
 
-    <!-- Submit button -->
-    <button type="submit">Submit</button>
+    <!-- Button container -->
+    <div class="button-container">
+        <button type="submit">Submit</button>
+    </div>
+
     </form>
 
     <script>
@@ -230,49 +275,76 @@
         let dataArray;
         let minDb = Infinity;
         let maxDb = -Infinity;
+        let recording = false;
+        let stream;
 
+        // Start Recording Button
         document.getElementById("startRecordingBtn").onclick = function () {
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(function (stream) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    analyser = audioContext.createAnalyser();
+            if (!recording) {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(function (s) {
+                        stream = s;
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        analyser = audioContext.createAnalyser();
+                        analyser.fftSize = 256;
+                        dataArray = new Uint8Array(analyser.frequencyBinCount);
+                        const source = audioContext.createMediaStreamSource(stream);
+                        source.connect(analyser);
+                        
+                        // Enable stop button and disable start button
+                        document.getElementById("startRecordingBtn").disabled = true;
+                        document.getElementById("stopRecordingBtn").disabled = false;
 
-                    const source = audioContext.createMediaStreamSource(stream);
-                    source.connect(analyser);
-
-                    analyser.fftSize = 256; // Set the FFT size
-                    dataArray = new Uint8Array(analyser.fftSize);
-
-                    setInterval(() => {
-                        analyser.getByteFrequencyData(dataArray);
-                        const rms = calculateRMS(dataArray);
-                        const db = 20 * Math.log10(rms / 255 + 1e-6); // Convert to dB
-
-                        // Update min, avg, max
-                        if (db < minDb) minDb = db;
-                        if (db > maxDb) maxDb = db;
-
-                        const avgDb = (minDb + maxDb) / 2;
-
-                        // Update the values on the page
-                        document.getElementById("min").value = minDb.toFixed(2);
-                        document.getElementById("avg").value = avgDb.toFixed(2);
-                        document.getElementById("max").value = maxDb.toFixed(2);
-                        document.getElementById("dbResults").style.display = "block";
-                    }, 100);
-                })
-                .catch(function (err) {
-                    console.error('Error accessing microphone: ', err);
-                });
+                        recording = true;
+                        captureDecibels();
+                    })
+                    .catch(function (err) {
+                        console.log("Error: " + err);
+                    });
+            }
         };
 
-        function calculateRMS(dataArray) {
-            let sum = 0;
-            for (let i = 0; i < dataArray.length; i++) {
-                sum += dataArray[i] * dataArray[i];
+        // Stop Recording Button
+        document.getElementById("stopRecordingBtn").onclick = function () {
+            if (recording) {
+                stream.getTracks().forEach(track => track.stop()); // Stop the media stream
+                recording = false;
+                document.getElementById("stopRecordingBtn").disabled = true;
+                document.getElementById("startRecordingBtn").disabled = false;
+                displayResults();
             }
-            return Math.sqrt(sum / dataArray.length);
+        };
+
+        function captureDecibels() {
+            if (recording) {
+                analyser.getByteFrequencyData(dataArray);
+
+                let sum = 0;
+                let count = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                    sum += dataArray[i];
+                    count++;
+                    let db = 20 * Math.log10(dataArray[i] / 255);
+                    minDb = Math.min(minDb, db);
+                    maxDb = Math.max(maxDb, db);
+                }
+
+                const avgDb = sum / count;
+
+                // Display the live db results
+                document.getElementById("min").value = minDb.toFixed(2);
+                document.getElementById("avg").value = avgDb.toFixed(2);
+                document.getElementById("max").value = maxDb.toFixed(2);
+
+                // Call this function again to keep capturing decibels
+                requestAnimationFrame(captureDecibels);
+            }
+        }
+
+        function displayResults() {
+            document.getElementById("dbResults").style.display = "block";
         }
     </script>
+
 </body>
 </html>
