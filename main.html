@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noise Data Collection</title>
+    <style>
+        /* Set background color to softer purple */
+        body {
+            background-color: #B39DDB; /* Softer purple */
+            font-family: 'Arial', sans-serif;
+            color: white;
+            margin: 0;
+            padding: 0;
+            text-align: left;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        header {
+            background-color: #9575CD; /* Slightly darker purple */
+            padding: 20px;
+            text-align: left;
+        }
+
+        header h1 {
+            font-size: 2em;
+            margin: 0;
+            padding: 10px 0;
+        }
+
+        header p {
+            font-size: 1.2em;
+        }
+
+        /* Form container styling */
+        form {
+            background-color: #D1C4E9; /* Lighter purple */
+            border-radius: 10px;
+            padding: 30px;
+            margin: 20px auto;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            display: inline-block;
+            font-weight: bold; /* Bold questions */
+            color: #7E57C2; /* Purple text */
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+            background-color: #7E57C2; /* Match slider color to button */
+        }
+
+        input[type="text"], input[type="date"], input[type="time"], select {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            width: 100%;
+            border: 1px solid #ccc;
+            font-size: 1em;
+            background-color: white; /* White input boxes */
+            color: #7E57C2; /* Purple text */
+        }
+
+        /* Button styles */
+        button {
+            background-color: #7E57C2; /* Soft purple */
+            color: white;
+            font-size: 1.1em;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: block;
+            margin: 30px auto 0 auto; /* Center the button */
+        }
+
+        button:hover {
+            background-color: #512DA8; /* Darker purple on hover */
+        }
+
+        /* Styling for the sliders and labels */
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .slider-container input[type="range"] {
+            width: 80%;
+            max-width: 300px;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            max-width: 300px;
+        }
+
+        .slider-labels span {
+            font-size: 0.9em;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        /* Adjust for the min/max db section to match date/time format */
+        .section input[type="text"], .section select {
+            width: 100%;
+        }
+
+        /* Make dB input boxes white */
+        input[type="text"] {
+            background-color: white; /* Set the background of the dB input boxes to white */
+            color: black; /* Set text color to black for contrast */
+            border: 1px solid #ccc; /* Light gray border for the input boxes */
+        }
+
+        /* Align Date and Time inputs side by side */
+        .date-time-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px; /* Reduced gap for closer spacing */
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .date-time-container input {
+            width: 48%; /* Make each input take up about half the space */
+        }
+
+        /* Center text for specific lines */
+        .center-text {
+            text-align: center;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>We are trying to collect data about the noise volumes around the Emily Carr Campus and we need your help!</h1>
+        <p>All you have to do is take out your phone while you’re working and fill in the form below (don’t forget to record the date and time). Record the sound in the room for 2-5mins and then submit the form. That’s it! Repeat this in all or as many of the rooms you do work in today.</p>
+    </header>
+
+    <form id="dataForm" action="https://formspree.io/f/xyzydkag" method="POST">
+        
+        <!-- Date and Time Inputs side by side -->
+        <div class="date-time-container">
+            <div class="section">
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date" required>
+            </div>
+            <div class="section">
+                <label for="time">Time:</label>
+                <input type="time" id="time" name="time" required>
+            </div>
+        </div>
+        
+        <!-- Room input -->
+        <div class="section">
+            <label for="room">What room are you in?</label>
+            <input type="text" id="room" name="room" required>
+        </div>
+        
+        <!-- Slider for volume perception -->
+        <div class="section slider-container">
+            <label for="volume">How do you perceive the volume in this room?</label>
+            <input type="range" id="volume" name="volume" min="1" max="10" step="1" required>
+            <div class="slider-labels">
+                <span>Extremely Quiet</span>
+                <span>Very Loud</span>
+            </div>
+        </div>
+
+        <!-- Slider for productivity -->
+        <div class="section slider-container">
+            <label for="productivity">How productive were you in this space?</label>
+            <input type="range" id="productivity" name="productivity" min="1" max="10" step="1" required>
+            <div class="slider-labels">
+                <span>Not Productive</span>
+                <span>Very Productive</span>
+            </div>
+        </div>
+
+        <!-- Dropdown for type of work -->
+        <div class="section">
+            <label for="workType">What kind of work are you doing in this space?</label>
+            <select id="workType" name="workType" required>
+                <option value="creative">Creative</option>
+                <option value="collaborative">Collaborative</option>
+                <option value="reading">Reading</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+
+    <!-- Decibel checker section -->
+    <div class="section">
+        <button type="button" id="startRecordingBtn">Start Recording</button>
+        <div id="dbResults" style="display: none;">
+            <label for="min">Min:</label>
+            <input type="text" id="min" name="min" disabled>
+            <label for="avg">Average:</label>
+            <input type="text" id="avg" name="avg" disabled>
+            <label for="max">Max:</label>
+            <input type="text" id="max" name="max" disabled>
+        </div>
+        <p class="center-text"><i>Hit record and record for 2-5mins. It will automatically fill in the information.</i></p>
+    </div>
+
+    <!-- Submit button -->
+    <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        let audioContext;
+        let analyser;
+        let dataArray;
+        let minDb = Infinity;
+        let maxDb = -Infinity;
+
+        document.getElementById("startRecordingBtn").onclick = function () {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(function (stream) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    analyser = audioContext.createAnalyser();
+
+                    const source = audioContext.createMediaStreamSource(stream);
+                    source.connect(analyser);
+
+                    analyser.fftSize = 256; // Set the FFT size
+                    dataArray = new Uint8Array(analyser.fftSize);
+
+                    setInterval(() => {
+                        analyser.getByteFrequencyData(dataArray);
+                        const rms = calculateRMS(dataArray);
+                        const db = 20 * Math.log10(rms / 255 + 1e-6); // Convert to dB
+
+                        // Update min, avg, max
+                        if (db < minDb) minDb = db;
+                        if (db > maxDb) maxDb = db;
+
+                        const avgDb = (minDb + maxDb) / 2;
+
+                        // Update the values on the page
+                        document.getElementById("min").value = minDb.toFixed(2);
+                        document.getElementById("avg").value = avgDb.toFixed(2);
+                        document.getElementById("max").value = maxDb.toFixed(2);
+                        document.getElementById("dbResults").style.display = "block";
+                    }, 100);
+                })
+                .catch(function (err) {
+                    console.error('Error accessing microphone: ', err);
+                });
+        };
+
+        function calculateRMS(dataArray) {
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+                sum += dataArray[i] * dataArray[i];
+            }
+            return Math.sqrt(sum / dataArray.length);
+        }
+    </script>
+</body>
+</html>
