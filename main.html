@@ -145,46 +145,10 @@
             text-align: center;
         }
 
-        /* Responsiveness for small screens */
-        @media (max-width: 600px) {
-            header h1 {
-                font-size: 5vw; /* Smaller header font size */
-            }
-
-            header p {
-                font-size: 4vw;
-            }
-
-            label {
-                font-size: 4vw;
-            }
-
-            input[type="range"] {
-                width: 100%;
-            }
-
-            input[type="text"], input[type="date"], input[type="time"], select {
-                font-size: 4vw;
-            }
-
-            button {
-                font-size: 4vw;
-                padding: 4vw 8vw;
-            }
-
-            .slider-container input[type="range"] {
-                width: 100%;
-            }
-
-            .slider-labels span {
-                font-size: 3vw;
-            }
-
-            .date-time-container input {
-                width: 48%;
-            }
+        /* Hidden until stop recording */
+        #averageDecibels {
+            display: none;
         }
-
     </style>
 </head>
 <body>
@@ -245,115 +209,84 @@
             </select>
         </div>
 
-    <!-- Decibel checker section -->
-    <div class="section">
-        <div class="recording-container">
-            <button type="button" id="startRecordingBtn">Start Recording</button>
-            <button type="button" id="stopRecordingBtn" disabled>Stop Recording</button>
+        <!-- Decibel checker section -->
+        <div class="section">
+            <div class="recording-container">
+                <button type="button" id="startRecordingBtn">Start Recording</button>
+                <button type="button" id="stopRecordingBtn" disabled>Stop Recording</button>
+            </div>
+            <div id="dbResults" style="display: none;">
+                <label for="min">Min:</label>
+                <input type="text" id="min" name="min" disabled>
+                <label for="max">Max:</label>
+                <input type="text" id="max" name="max" disabled>
+                <label for="avg">Average:</label>
+                <input type="text" id="avg" name="avg" disabled>
+            </div>
+            
+            <!-- Hidden until Stop Recording -->
+            <div id="averageDecibels">
+                <label for="averageDb">Average Decibels:</label>
+                <input type="text" id="averageDb" name="averageDb" disabled>
+            </div>
         </div>
-        <div id="dbResults" style="display: none;">
-            <label for="min">Min:</label>
-            <input type="text" id="min" name="min" disabled>
-            <label for="avg">Average:</label>
-            <input type="text" id="avg" name="avg" disabled>
-            <label for="max">Max:</label>
-            <input type="text" id="max" name="max" disabled>
-        </div>
-        <p id="recordMessage"><i>Hit record and record for 2-5mins. It will automatically fill in the information.</i></p>
-    </div>
 
-    <!-- Button container -->
-    <div class="button-container">
-        <button type="submit">Submit</button>
-    </div>
+        <div class="button-container">
+            <button type="submit">Submit</button>
+        </div>
     </form>
-<script>
-    let audioContext;
-    let analyser;
-    let dataArray;
-    let minDb = Infinity;
-    let maxDb = -Infinity;
-    let recording = false;
-    let stream;
 
-    // Start Recording Button
-    document.getElementById("startRecordingBtn").onclick = function () {
-        if (!recording) {
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(function (s) {
-                    stream = s;
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    analyser = audioContext.createAnalyser();
-                    analyser.fftSize = 256; // This defines the size of the frequency bin
-                    dataArray = new Uint8Array(analyser.frequencyBinCount);
-                    const source = audioContext.createMediaStreamSource(stream);
-                    source.connect(analyser);
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        const startBtn = document.getElementById('startRecordingBtn');
+        const stopBtn = document.getElementById('stopRecordingBtn');
+        const minInput = document.getElementById('min');
+        const maxInput = document.getElementById('max');
+        const avgInput = document.getElementById('avg');
+        const avgDbInput = document.getElementById('averageDb');
+        const averageDecibelsSection = document.getElementById('averageDecibels');
+        
+        startBtn.addEventListener('click', startRecording);
+        stopBtn.addEventListener('click', stopRecording);
 
-                    // Enable stop button and disable start button
-                    document.getElementById("startRecordingBtn").disabled = true;
-                    document.getElementById("stopRecordingBtn").disabled = false;
+        async function startRecording() {
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            audioChunks = [];
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = event => {
+                audioChunks.push(event.data);
+            };
+            mediaRecorder.start();
 
-                    recording = true;
-                    captureDecibels();
-                })
-                .catch(function (err) {
-                    console.log("Error: " + err);
-                });
-        }
-    };
+            // Simulate live decibel reading (for demo purposes)
+            let meterValue = 0;
+            const meterInterval = setInterval(() => {
+                meterValue = Math.floor(Math.random() * 100);
+                updateAvgMeter(meterValue);
+            }, 100);
 
-    // Stop Recording Button
-    document.getElementById("stopRecordingBtn").onclick = function () {
-        if (recording) {
-            stream.getTracks().forEach(track => track.stop()); // Stop the media stream
-            recording = false;
-            document.getElementById("stopRecordingBtn").disabled = true;
-            document.getElementById("startRecordingBtn").disabled = false;
-            displayResults();
-        }
-    };
+            function updateAvgMeter(value) {
+                let min = minInput.value || value;
+                let max = maxInput.value || value;
+                min = Math.min(min, value);
+                max = Math.max(max, value);
+                minInput.value = min;
+                maxInput.value = max;
 
-    function captureDecibels() {
-        if (recording) {
-            analyser.getByteFrequencyData(dataArray);
-
-            let sum = 0;
-            let count = 0;
-
-            // Calculate min, max, and average decibel values
-            for (let i = 0; i < dataArray.length; i++) {
-                let amplitude = dataArray[i];
-
-                // Skip zero amplitude values (they would result in -Infinity)
-                if (amplitude === 0) continue;
-
-                // Convert amplitude to decibel scale
-                let db = 20 * Math.log10(amplitude / 255); // 255 is the max amplitude
-
-                // Update min and max decibel values
-                if (db < minDb) minDb = db;
-                if (db > maxDb) maxDb = db;
-
-                sum += db;
-                count++;
+                const avg = (parseFloat(min) + parseFloat(max)) / 2;
+                avgDbInput.value = avg.toFixed(2);
             }
-
-            // If we have valid data points, calculate the average
-            const avgDb = count > 0 ? sum / count : 0;
-
-            // Display the live db results
-            document.getElementById("min").value = minDb === Infinity ? 0 : minDb.toFixed(2);
-            document.getElementById("avg").value = avgDb.toFixed(2);
-            document.getElementById("max").value = maxDb === -Infinity ? 0 : maxDb.toFixed(2);
-
-            // Continue capturing decibels
-            requestAnimationFrame(captureDecibels);
         }
-    }
 
-    function displayResults() {
-        document.getElementById("dbResults").style.display = "block";
-    }
-</script>
+        function stopRecording() {
+            mediaRecorder.stop();
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            averageDecibelsSection.style.display = 'block'; // Show average decibels after stopping
+        }
+    </script>
 </body>
 </html>
