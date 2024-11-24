@@ -266,85 +266,88 @@
     <div class="button-container">
         <button type="submit">Submit</button>
     </div>
-
     </form>
-
     <script>
-        let audioContext;
-        let analyser;
-        let dataArray;
-        let minDb = Infinity;
-        let maxDb = -Infinity;
-        let recording = false;
-        let stream;
+    let audioContext;
+    let analyser;
+    let dataArray;
+    let minDb = Infinity;
+    let maxDb = -Infinity;
+    let recording = false;
+    let stream;
 
-        // Start Recording Button
-        document.getElementById("startRecordingBtn").onclick = function () {
-            if (!recording) {
-                navigator.mediaDevices.getUserMedia({ audio: true })
-                    .then(function (s) {
-                        stream = s;
-                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                        analyser = audioContext.createAnalyser();
-                        analyser.fftSize = 256;
-                        dataArray = new Uint8Array(analyser.frequencyBinCount);
-                        const source = audioContext.createMediaStreamSource(stream);
-                        source.connect(analyser);
-                        
-                        // Enable stop button and disable start button
-                        document.getElementById("startRecordingBtn").disabled = true;
-                        document.getElementById("stopRecordingBtn").disabled = false;
+    // Start Recording Button
+    document.getElementById("startRecordingBtn").onclick = function () {
+        if (!recording) {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(function (s) {
+                    stream = s;
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    analyser = audioContext.createAnalyser();
+                    analyser.fftSize = 256; // This defines the size of the frequency bin
+                    dataArray = new Uint8Array(analyser.frequencyBinCount);
+                    const source = audioContext.createMediaStreamSource(stream);
+                    source.connect(analyser);
+                    
+                    // Enable stop button and disable start button
+                    document.getElementById("startRecordingBtn").disabled = true;
+                    document.getElementById("stopRecordingBtn").disabled = false;
 
-                        recording = true;
-                        captureDecibels();
-                    })
-                    .catch(function (err) {
-                        console.log("Error: " + err);
-                    });
-            }
-        };
-
-        // Stop Recording Button
-        document.getElementById("stopRecordingBtn").onclick = function () {
-            if (recording) {
-                stream.getTracks().forEach(track => track.stop()); // Stop the media stream
-                recording = false;
-                document.getElementById("stopRecordingBtn").disabled = true;
-                document.getElementById("startRecordingBtn").disabled = false;
-                displayResults();
-            }
-        };
-
-        function captureDecibels() {
-            if (recording) {
-                analyser.getByteFrequencyData(dataArray);
-
-                let sum = 0;
-                let count = 0;
-                for (let i = 0; i < dataArray.length; i++) {
-                    sum += dataArray[i];
-                    count++;
-                    let db = 20 * Math.log10(dataArray[i] / 255);
-                    minDb = Math.min(minDb, db);
-                    maxDb = Math.max(maxDb, db);
-                }
-
-                const avgDb = sum / count;
-
-                // Display the live db results
-                document.getElementById("min").value = minDb.toFixed(2);
-                document.getElementById("avg").value = avgDb.toFixed(2);
-                document.getElementById("max").value = maxDb.toFixed(2);
-
-                // Call this function again to keep capturing decibels
-                requestAnimationFrame(captureDecibels);
-            }
+                    recording = true;
+                    captureDecibels();
+                })
+                .catch(function (err) {
+                    console.log("Error: " + err);
+                });
         }
+    };
 
-        function displayResults() {
-            document.getElementById("dbResults").style.display = "block";
+    // Stop Recording Button
+    document.getElementById("stopRecordingBtn").onclick = function () {
+        if (recording) {
+            stream.getTracks().forEach(track => track.stop()); // Stop the media stream
+            recording = false;
+            document.getElementById("stopRecordingBtn").disabled = true;
+            document.getElementById("startRecordingBtn").disabled = false;
+            displayResults();
         }
-    </script>
+    };
 
+    function captureDecibels() {
+        if (recording) {
+            analyser.getByteFrequencyData(dataArray);
+
+            let sum = 0;
+            let count = 0;
+
+            // Calculate min, max, and average decibel values
+            for (let i = 0; i < dataArray.length; i++) {
+                let amplitude = dataArray[i];
+                let db = 20 * Math.log10(amplitude / 255); // Convert amplitude to decibels
+
+                // Update min and max decibel values
+                if (db < minDb) minDb = db;
+                if (db > maxDb) maxDb = db;
+
+                sum += db;
+                count++;
+            }
+
+            const avgDb = sum / count;
+
+            // Display the live db results
+            document.getElementById("min").value = minDb.toFixed(2);
+            document.getElementById("avg").value = avgDb.toFixed(2);
+            document.getElementById("max").value = maxDb.toFixed(2);
+
+            // Continue capturing decibels
+            requestAnimationFrame(captureDecibels);
+        }
+    }
+
+    function displayResults() {
+        document.getElementById("dbResults").style.display = "block";
+    }
+</script>
 </body>
 </html>
