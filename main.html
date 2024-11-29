@@ -229,7 +229,7 @@
             <!-- Hidden until Stop Recording -->
             <div id="averageDecibels">
                 <label for="averageDb"></label>
-                <input type="text" id="averageDb" name="averageDb" required>
+                <input type="text" id="averageDb" name="averageDb" required readonly>
             </div>
         </div>
 
@@ -239,58 +239,64 @@
     </form>
 
     <script>
-        let mediaRecorder;
-        let audioChunks = [];
-        const startBtn = document.getElementById('startRecordingBtn');
-        const stopBtn = document.getElementById('stopRecordingBtn');
-        const minInput = document.getElementById('min');
-        const maxInput = document.getElementById('max');
-        const avgDbInput = document.getElementById('averageDb');
-        const averageDecibelsSection = document.getElementById('averageDecibels');
-        
-        startBtn.addEventListener('click', startRecording);
-        stopBtn.addEventListener('click', stopRecording);
-        
-        async function startRecording() {
-            startBtn.disabled = true;
-            stopBtn.disabled = false;
+        let audioContext;
+        let analyser;
+        let dataArray;
+        let recording = false;
+        let stream;
+        let totalDb = 0;
+        let frameCount = 0;
 
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.ondataavailable = event => {
-                audioChunks.push(event.data);
-            };
-            mediaRecorder.start();
+        document.getElementById("startRecordingBtn").onclick = function () {
+            if (!recording) {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(function (s) {
+                        stream = s;
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        analyser = audioContext.createAnalyser();
+                        analyser.fftSize = 1024;
+                        dataArray = new Uint8Array(analyser.frequencyBinCount);
+                        const source = audioContext.createMediaStreamSource(stream);
+                        source.connect(analyser);
 
-            // Simulate live decibel reading (for demo purposes)
-            let meterValue = 0;
-            const meterInterval = setInterval(() => {
-                meterValue = Math.floor(Math.random() * 100);
-                updateAvgMeter(meterValue);
-            }, 100);
+                        document.getElementById("startRecordingBtn").disabled = true;
+                        document.getElementById("stopRecordingBtn").disabled = false;
 
-            function updateAvgMeter(value) {
-                let min = minInput.value || value;
-                let max = maxInput.value || value;
-                min = Math.min(min, value);
-                max = Math.max(max, value);
-                minInput.value = min;
-                maxInput.value = max;
-
-                const avg = (parseFloat(min) + parseFloat(max)) / 2;
-                avgDbInput.value = avg.toFixed(2);
+                        recording = true;
+                        collectAudioData();
+                    });
             }
+        };
+
+        function collectAudioData() {
+            if (!recording) return;
+
+            analyser.getByteFrequencyData(dataArray);
+            const avgDb = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+            totalDb += avgDb;
+            frameCount++;
+
+            requestAnimationFrame(collectAudioData);
         }
 
-        function stopRecording() {
-            mediaRecorder.stop();
-            startBtn.disabled = false;
-            stopBtn.disabled = true;
-            averageDecibelsSection.style.display = 'block'; // Show average decibels after stopping
+        document.getElementById("stopRecordingBtn").onclick = function () {
+            if (recording) {
+                stream.getTracks().forEach(track => track.stop());
+                recording = false;
 
-            // Copy the average value to the hidden field for submission
-            avgDbInput.value = avgDbInput.value || 'N/A'; // Default to N/A if no value
-        }
+                const averageDb = totalDb / frameCount;
+
+                document.getElementById("averageDb").value = averageDb.toFixed(2);
+                document.getElementById("averageDecibels").style.display = "block";
+
+                document.getElementById("startRecordingBtn").disabled = false;
+                document.getElementById("stopRecordingBtn").disabled = true;
+
+                // Reset data for next recording
+                totalDb = 0;
+                frameCount = 0;
+            }
+        };
     </script>
 
 </body>
